@@ -1,0 +1,399 @@
+/* Snippet Manager Styles */
+
+/* ================================
+   Code Editor Sizing
+   ================================ */
+
+[data-doctype="Tailwind Snippet"] .frappe-control[data-fieldname="html_code"] .ace_editor {
+	min-height: 400px !important;
+	font-size: 13px !important;
+}
+
+[data-doctype="Tailwind Snippet"] .frappe-control[data-fieldname="custom_css"] .ace_editor {
+	min-height: 250px !important;
+	font-size: 13px !important;
+}
+
+/* Make code section full width */
+[data-doctype="Tailwind Snippet"] .frappe-control[data-fieldname="code_section"] + .section-body {
+	display: block !important;
+}
+
+[data-doctype="Tailwind Snippet"] .frappe-control[data-fieldname="code_section"] + .section-body > .form-column {
+	width: 100% !important;
+	padding: 0 !important;
+}
+
+/* ================================
+   Preview Container
+   ================================ */
+
+.tailwind-preview-container {
+	margin-top: 10px;
+	border-radius: 8px;
+	overflow: hidden;
+	border: 1px solid var(--border-color);
+	background: var(--fg-color);
+}
+
+/* ================================
+   Preview Toolbar
+   ================================ */
+
+.preview-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 12px 16px;
+	background: var(--fg-color);
+	border-bottom: 1px solid var(--border-color);
+	flex-wrap: wrap;
+}
+
+.toolbar-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.toolbar-label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	letter-spacing: 0.5px;
+}
+
+.toolbar-group .btn-group {
+	display: flex;
+	gap: 2px;
+}
+
+.toolbar-group .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 6px 10px;
+	border-radius: 6px;
+	transition: all 0.15s ease;
+}
+
+.toolbar-group .btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.toolbar-group .btn.active {
+	background: var(--primary);
+	color: #fff;
+	border-color: var(--primary);
+}
+
+.toolbar-group .btn.active:hover {
+	background: var(--primary-dark);
+}
+
+.toolbar-group .zoom-level {
+	min-width: 48px;
+	text-align: center;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.toolbar-group .zoom-reset {
+	font-size: 11px;
+	padding: 4px 8px;
+}
+
+.toolbar-actions {
+	margin-left: auto;
+}
+
+.viewport-info {
+	margin-left: auto;
+	font-size: 12px;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.viewport-info .viewport-size {
+	font-weight: 600;
+	font-family: ui-monospace, monospace;
+	background: var(--bg-color);
+	padding: 4px 10px;
+	border-radius: 4px;
+	min-width: 80px;
+	text-align: center;
+}
+
+.viewport-info .drag-hint {
+	font-size: 11px;
+	opacity: 0.6;
+}
+
+/* ================================
+   Resizable Preview Frame
+   ================================ */
+
+.preview-resizable-wrapper {
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	position: relative;
+	background: var(--bg-color);
+	min-height: 400px;
+	padding: 0 8px;
+}
+
+.preview-frame-wrapper {
+	transition: width 0.15s ease;
+	flex-shrink: 0;
+}
+
+.preview-frame-container {
+	background: #ffffff;
+	min-height: 300px;
+	overflow: hidden;
+	border-radius: 8px;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.preview-frame-container[data-bg="light"] {
+	background: #ffffff;
+}
+
+.preview-frame-container[data-bg="dark"] {
+	background: #1a1a2e;
+}
+
+.preview-frame-container[data-bg="checkered"] {
+	background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+}
+
+.preview-iframe {
+	width: 100%;
+	min-height: 500px;
+	border: none;
+	display: block;
+	background: transparent;
+}
+
+/* ================================
+   Resize Handles
+   ================================ */
+
+.resize-handle {
+	width: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: ew-resize;
+	user-select: none;
+	flex-shrink: 0;
+	position: relative;
+	z-index: 10;
+}
+
+.resize-handle:hover .handle-bar,
+.resize-handle:active .handle-bar {
+	background: var(--primary);
+	transform: scaleY(1.2);
+}
+
+.handle-bar {
+	width: 4px;
+	height: 48px;
+	background: var(--gray-400);
+	border-radius: 4px;
+	transition: all 0.15s ease;
+}
+
+.resize-handle:active .handle-bar {
+	background: var(--primary);
+	box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Width indicator tooltip */
+.width-indicator {
+	position: fixed;
+	z-index: 9999;
+	background: var(--gray-900);
+	color: #fff;
+	padding: 6px 12px;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	font-family: ui-monospace, monospace;
+	pointer-events: none;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.width-indicator::after {
+	content: "";
+	position: absolute;
+	bottom: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid var(--gray-900);
+}
+
+/* ================================
+   Empty State
+   ================================ */
+
+.preview-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.preview-empty-state svg {
+	opacity: 0.4;
+	margin-bottom: 16px;
+}
+
+.preview-empty-state p {
+	margin: 0;
+	font-size: 14px;
+}
+
+/* ================================
+   List View Enhancements
+   ================================ */
+
+.list-row[data-doctype="Tailwind Snippet"] .like-disabled-input[data-fieldname="is_favorite"] {
+	color: var(--yellow-500);
+}
+
+/* Star icon in list */
+.list-row[data-doctype="Tailwind Snippet"] .level-left .indicator-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* Type indicator colors */
+.indicator-pill[data-indicator="blue"] { background: var(--blue-100); color: var(--blue-600); }
+.indicator-pill[data-indicator="green"] { background: var(--green-100); color: var(--green-600); }
+.indicator-pill[data-indicator="purple"] { background: var(--purple-100); color: var(--purple-600); }
+.indicator-pill[data-indicator="orange"] { background: var(--orange-100); color: var(--orange-600); }
+.indicator-pill[data-indicator="cyan"] { background: var(--cyan-100); color: var(--cyan-600); }
+.indicator-pill[data-indicator="yellow"] { background: var(--yellow-100); color: var(--yellow-600); }
+.indicator-pill[data-indicator="pink"] { background: var(--pink-100); color: var(--pink-600); }
+.indicator-pill[data-indicator="red"] { background: var(--red-100); color: var(--red-600); }
+
+/* ================================
+   Category Color
+   ================================ */
+
+.snippet-category-color {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 8px;
+}
+
+/* ================================
+   Dark Mode Support
+   ================================ */
+
+[data-theme="dark"] .preview-frame-container[data-bg="light"] {
+	background: #ffffff;
+}
+
+[data-theme="dark"] .preview-toolbar {
+	background: var(--fg-color);
+}
+
+[data-theme="dark"] .tailwind-preview-container {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .preview-resizable-wrapper {
+	background: var(--bg-color);
+}
+
+[data-theme="dark"] .handle-bar {
+	background: var(--gray-600);
+}
+
+[data-theme="dark"] .width-indicator {
+	background: var(--gray-800);
+}
+
+[data-theme="dark"] .width-indicator::after {
+	border-top-color: var(--gray-800);
+}
+
+/* ================================
+   Responsive Adjustments
+   ================================ */
+
+@media (max-width: 768px) {
+	.preview-toolbar {
+		gap: 10px;
+		padding: 10px 12px;
+	}
+
+	.toolbar-label {
+		display: none;
+	}
+
+	.toolbar-actions {
+		margin-left: 0;
+	}
+
+	.viewport-info .drag-hint {
+		display: none;
+	}
+
+	.resize-handle {
+		width: 16px;
+	}
+
+	.handle-bar {
+		width: 3px;
+		height: 36px;
+	}
+}
+
+/* ================================
+   Action Button Styling
+   ================================ */
+
+[data-doctype="Tailwind Snippet"] .page-actions .btn-group-sm .dropdown-menu {
+	min-width: 180px;
+}
+
+[data-doctype="Tailwind Snippet"] .page-actions .btn-group-sm .dropdown-item {
+	padding: 8px 16px;
+	font-size: 13px;
+}
+
+/* ================================
+   Form Layout Improvements
+   ================================ */
+
+[data-doctype="Tailwind Snippet"] .form-section[data-fieldname="code_section"] {
+	margin-top: 20px;
+}
+
+[data-doctype="Tailwind Snippet"] .form-section[data-fieldname="preview_section"] {
+	margin-top: 20px;
+}
+
+/* Make preview section header more prominent */
+[data-doctype="Tailwind Snippet"] .section-head[data-fieldname="preview_section"] {
+	font-size: 14px;
+	font-weight: 600;
+}

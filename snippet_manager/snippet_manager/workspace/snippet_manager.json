@@ -1,0 +1,64 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"hero\",\"type\":\"hero\",\"data\":{\"heading\":\"Snippet Manager\",\"sub_heading\":\"Manage and preview your Tailwind CSS snippets\",\"color\":\"blue\"}},{\"id\":\"shortcuts\",\"type\":\"shortcut\",\"data\":{\"shortcut_type\":\"DocType\",\"doctype\":\"Tailwind Snippet\",\"link_to\":\"Tailwind Snippet\",\"label\":\"Tailwind Snippets\",\"color\":\"blue\"}},{\"id\":\"shortcuts_2\",\"type\":\"shortcut\",\"data\":{\"shortcut_type\":\"DocType\",\"doctype\":\"Snippet Category\",\"link_to\":\"Snippet Category\",\"label\":\"Categories\",\"color\":\"green\"}}]",
+ "creation": "2025-02-05 10:00:00.000000",
+ "custom_blocks": [],
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "code",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Snippet Manager",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Snippets",
+   "link_count": 0,
+   "link_to": "Tailwind Snippet",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Categories",
+   "link_count": 0,
+   "link_to": "Snippet Category",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-02-05 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Snippet Manager",
+ "name": "Snippet Manager",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 1,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Tailwind Snippets",
+   "link_to": "Tailwind Snippet",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Categories",
+   "link_to": "Snippet Category",
+   "type": "DocType"
+  }
+ ],
+ "title": "Snippet Manager"
+}

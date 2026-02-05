@@ -1,0 +1,666 @@
+{% if snippet %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ snippet.title }} - Tailwind Preview</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            min-height: 100vh;
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .preview-toolbar .title {
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-toolbar .btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .preview-toolbar .btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .preview-toolbar .btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .preview-toolbar .btn-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .preview-toolbar .separator {
+            width: 1px;
+            height: 24px;
+            background: rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+
+        .preview-toolbar .viewport-input {
+            font-size: 12px;
+            font-family: ui-monospace, monospace;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 10px;
+            border-radius: 4px;
+            width: 90px;
+            text-align: center;
+            border: 1px solid transparent;
+            color: #fff;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .preview-toolbar .viewport-input:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .preview-toolbar .viewport-input:focus {
+            background: rgba(255,255,255,0.2);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .preview-toolbar .viewport-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .preview-toolbar .drag-hint {
+            font-size: 11px;
+            opacity: 0.5;
+            margin-left: 8px;
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 70px 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .resizable-wrapper {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .resize-handle {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: ew-resize;
+            user-select: none;
+            flex-shrink: 0;
+            touch-action: none; /* Critical for pointer capture on touch devices */
+        }
+
+        .resize-handle:hover .handle-bar {
+            background: #3b82f6;
+            transform: scaleY(1.2);
+        }
+
+        .resize-handle.active .handle-bar {
+            background: #2563eb;
+            transform: scaleY(1.4);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+
+        .handle-bar {
+            width: 5px;
+            height: 60px;
+            background: #9ca3af;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        /* Prevent text selection during drag */
+        body.is-resizing {
+            cursor: ew-resize !important;
+            user-select: none !important;
+        }
+
+        body.is-resizing * {
+            cursor: ew-resize !important;
+        }
+
+        .iframe-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+            transition: width 0.1s ease;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .iframe-container[data-bg="dark"] {
+            background: #1a1a2e;
+        }
+
+        .iframe-container[data-bg="checkered"] {
+            background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            min-height: calc(100vh - 110px);
+            border: none;
+            display: block;
+        }
+
+        .width-tooltip {
+            position: fixed;
+            z-index: 99999;
+            background: #1f2937;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: ui-monospace, monospace;
+            pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .preview-toolbar {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 10px 15px;
+            }
+            .preview-toolbar .separator {
+                display: none;
+            }
+            .preview-toolbar .title {
+                width: 100%;
+                flex: none;
+            }
+            .preview-toolbar .drag-hint {
+                display: none;
+            }
+            .resize-handle {
+                width: 16px;
+            }
+            .handle-bar {
+                width: 4px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-toolbar">
+        <div class="title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 8px;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+            {{ snippet.title }}
+            {% if snippet.category %}<span style="opacity: 0.6; margin-left: 8px;">/ {{ snippet.category }}</span>{% endif %}
+        </div>
+
+        <div class="btn-group" id="viewport-btns">
+            <button class="btn active" data-viewport="desktop" data-width="100%" title="Desktop (100%)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Desktop
+            </button>
+            <button class="btn" data-viewport="tablet" data-width="768" title="Tablet (768px)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                Tablet
+            </button>
+            <button class="btn" data-viewport="mobile" data-width="375" title="Mobile (375px)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                Mobile
+            </button>
+        </div>
+
+        <input type="text" class="viewport-input" id="viewport-input" value="100%" placeholder="e.g. 768px or 100%">
+        <span class="drag-hint">← Drag or type width →</span>
+
+        <div class="separator"></div>
+
+        <div class="btn-group" id="bg-btns">
+            <button class="btn active" data-bg="light" title="Light Background">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+            <button class="btn" data-bg="dark" title="Dark Background">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <button class="btn" data-bg="checkered" title="Checkered Background">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
+        </div>
+
+        <div class="separator"></div>
+
+        <button class="btn" id="copy-btn" title="Copy HTML">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+        </button>
+
+        <button class="btn" onclick="window.location.href='/app/tailwind-snippet/{{ snippet.name }}'" title="Edit Snippet">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+        </button>
+    </div>
+
+    <div class="preview-area">
+        <div class="resizable-wrapper" id="resizable-wrapper">
+            <div class="resize-handle" id="handle-left" data-side="left">
+                <div class="handle-bar"></div>
+            </div>
+            <div class="iframe-container" id="iframe-container" data-bg="light">
+                <iframe class="preview-iframe" id="preview-iframe"></iframe>
+            </div>
+            <div class="resize-handle" id="handle-right" data-side="right">
+                <div class="handle-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="width-tooltip" id="width-tooltip"></div>
+
+    <script>
+        const htmlCode = {{ snippet.html_code | tojson }};
+        const customCss = {{ (snippet.custom_css or "") | tojson }};
+        const snippetTitle = {{ snippet.title | tojson }};
+
+        let currentBg = 'light';
+        let currentWidth = null; // null means 100%
+
+        // Generate iframe content
+        function getPreviewHTML(bgType) {
+            const bgStyles = {
+                light: 'background-color: #ffffff;',
+                dark: 'background-color: #1a1a2e; color: #eaeaea;',
+                checkered: 'background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;'
+            };
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${snippetTitle}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"><\/script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            min-height: 100vh;
+            ${bgStyles[bgType] || bgStyles.light}
+        }
+        ${customCss}
+    </style>
+</head>
+<body>
+    ${htmlCode}
+</body>
+</html>`;
+        }
+
+        // Initialize iframe
+        function initIframe() {
+            const iframe = document.getElementById('preview-iframe');
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(getPreviewHTML(currentBg));
+            doc.close();
+
+            iframe.onload = function() {
+                try {
+                    const body = doc.body;
+                    const html = doc.documentElement;
+                    const height = Math.max(
+                        body.scrollHeight, body.offsetHeight,
+                        html.clientHeight, html.scrollHeight, html.offsetHeight
+                    );
+                    iframe.style.minHeight = Math.max(height + 40, window.innerHeight - 110) + 'px';
+                } catch(e) {}
+            };
+        }
+
+        // Update width display
+        function updateWidthInput(width) {
+            const input = document.getElementById('viewport-input');
+            if (width === null || width === '100%') {
+                input.value = '100%';
+            } else {
+                input.value = Math.round(width) + 'px';
+            }
+        }
+
+        // Parse width input (supports: 768, 768px, 100%, 50%)
+        function parseWidthInput(value) {
+            value = value.trim().toLowerCase();
+
+            // Handle percentage
+            if (value.endsWith('%')) {
+                const percent = parseFloat(value);
+                if (!isNaN(percent) && percent > 0 && percent <= 100) {
+                    return { type: 'percent', value: percent };
+                }
+            }
+
+            // Handle pixel value (with or without 'px')
+            const numValue = parseFloat(value.replace('px', ''));
+            if (!isNaN(numValue) && numValue >= 280) {
+                return { type: 'pixel', value: numValue };
+            }
+
+            return null;
+        }
+
+        // Apply width from input
+        function applyWidthFromInput() {
+            const input = document.getElementById('viewport-input');
+            const parsed = parseWidthInput(input.value);
+            const wrapper = document.getElementById('resizable-wrapper');
+            const maxWidth = wrapper.offsetWidth - 60;
+
+            if (!parsed) {
+                // Invalid input - reset to current
+                updateWidthInput(currentWidth);
+                return;
+            }
+
+            // Deselect preset buttons
+            document.querySelectorAll('#viewport-btns .btn').forEach(b => b.classList.remove('active'));
+
+            if (parsed.type === 'percent') {
+                if (parsed.value === 100) {
+                    setContainerWidth(null);
+                    // Re-select desktop button for 100%
+                    document.querySelector('[data-viewport="desktop"]').classList.add('active');
+                } else {
+                    // Calculate pixel width from percentage
+                    const pixelWidth = Math.round((parsed.value / 100) * maxWidth);
+                    const clampedWidth = Math.max(280, Math.min(maxWidth, pixelWidth));
+                    setContainerWidth(clampedWidth);
+                }
+            } else {
+                // Pixel value
+                const clampedWidth = Math.max(280, Math.min(maxWidth, parsed.value));
+                setContainerWidth(clampedWidth);
+
+                // Check if it matches a preset
+                if (clampedWidth === 768) {
+                    document.querySelector('[data-viewport="tablet"]').classList.add('active');
+                } else if (clampedWidth === 375) {
+                    document.querySelector('[data-viewport="mobile"]').classList.add('active');
+                }
+            }
+        }
+
+        // Input event handlers
+        document.getElementById('viewport-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyWidthFromInput();
+                this.blur();
+            } else if (e.key === 'Escape') {
+                updateWidthInput(currentWidth);
+                this.blur();
+            }
+        });
+
+        document.getElementById('viewport-input').addEventListener('blur', function() {
+            applyWidthFromInput();
+        });
+
+        // Set container width
+        function setContainerWidth(width) {
+            const container = document.getElementById('iframe-container');
+            if (width === null || width === '100%') {
+                container.style.width = '100%';
+                currentWidth = null;
+            } else {
+                container.style.width = width + 'px';
+                currentWidth = width;
+            }
+            updateWidthInput(width);
+        }
+
+        // Viewport preset buttons
+        document.getElementById('viewport-btns').addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-viewport]');
+            if (!btn) return;
+
+            const width = btn.dataset.width;
+
+            // Update buttons
+            this.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Set width
+            if (width === '100%') {
+                setContainerWidth(null);
+            } else {
+                setContainerWidth(parseInt(width));
+            }
+        });
+
+        // Background switching
+        document.getElementById('bg-btns').addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-bg]');
+            if (!btn) return;
+
+            const bg = btn.dataset.bg;
+            currentBg = bg;
+
+            this.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.getElementById('iframe-container').dataset.bg = bg;
+            initIframe();
+        });
+
+        // Robust drag resize using Pointer Events API with pointer capture
+        // This ensures reliable tracking even when pointer moves fast or outside the element
+        const container = document.getElementById('iframe-container');
+        const wrapper = document.getElementById('resizable-wrapper');
+        const tooltip = document.getElementById('width-tooltip');
+        const iframe = document.getElementById('preview-iframe');
+
+        function initResizeHandle(handle) {
+            let startX = 0;
+            let startWidth = 0;
+            const side = handle.dataset.side;
+
+            function onPointerDown(e) {
+                e.preventDefault();
+
+                // Capture pointer - this is key for reliable tracking
+                handle.setPointerCapture(e.pointerId);
+
+                startX = e.clientX;
+                startWidth = container.offsetWidth;
+                handle.classList.add('active');
+
+                // Disable iframe pointer events during drag and add body class
+                iframe.style.pointerEvents = 'none';
+                document.body.classList.add('is-resizing');
+
+                // Show tooltip
+                tooltip.style.display = 'block';
+                tooltip.textContent = Math.round(startWidth) + 'px';
+                updateTooltipPosition(e.clientX, e.clientY);
+            }
+
+            function onPointerMove(e) {
+                if (!handle.hasPointerCapture(e.pointerId)) return;
+
+                const diff = side === 'right' ? e.clientX - startX : startX - e.clientX;
+                let newWidth = startWidth + diff * 2;
+
+                // Clamp width
+                const maxWidth = wrapper.offsetWidth - 60;
+                newWidth = Math.max(280, Math.min(maxWidth, newWidth));
+
+                // Apply width
+                container.style.width = newWidth + 'px';
+                currentWidth = newWidth;
+
+                // Update displays
+                updateWidthInput(newWidth);
+                tooltip.textContent = Math.round(newWidth) + 'px';
+                updateTooltipPosition(e.clientX, e.clientY);
+
+                // Deselect preset buttons
+                document.querySelectorAll('#viewport-btns .btn').forEach(b => b.classList.remove('active'));
+            }
+
+            function onPointerUp(e) {
+                if (handle.hasPointerCapture(e.pointerId)) {
+                    handle.releasePointerCapture(e.pointerId);
+                }
+
+                handle.classList.remove('active');
+                tooltip.style.display = 'none';
+
+                // Restore iframe and body styles
+                iframe.style.pointerEvents = '';
+                document.body.classList.remove('is-resizing');
+            }
+
+            function onPointerCancel(e) {
+                onPointerUp(e);
+            }
+
+            // Use pointer events for better cross-device support
+            handle.addEventListener('pointerdown', onPointerDown);
+            handle.addEventListener('pointermove', onPointerMove);
+            handle.addEventListener('pointerup', onPointerUp);
+            handle.addEventListener('pointercancel', onPointerCancel);
+
+            // Prevent default touch actions on handles
+            handle.style.touchAction = 'none';
+        }
+
+        function updateTooltipPosition(x, y) {
+            // Keep tooltip near cursor but within viewport
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const padding = 15;
+
+            let left = x - 40;
+            let top = y - 50;
+
+            // Keep within viewport
+            left = Math.max(padding, Math.min(window.innerWidth - 100, left));
+            top = Math.max(padding, Math.min(window.innerHeight - 50, top));
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        // Initialize both handles
+        document.querySelectorAll('.resize-handle').forEach(initResizeHandle);
+
+        // Copy HTML
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const btn = this;
+            navigator.clipboard.writeText(htmlCode).then(() => {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        });
+
+        // Initialize
+        initIframe();
+    </script>
+</body>
+</html>
+{% else %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snippet Not Found</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f9fafb;
+            color: #6b7280;
+            text-align: center;
+        }
+        svg { margin-bottom: 20px; opacity: 0.5; }
+        h1 { margin: 0 0 10px; font-size: 24px; color: #1f2937; }
+        p { margin: 0 0 20px; }
+        a {
+            color: #3b82f6;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+        }
+        a:hover { background: #3b82f6; color: #fff; }
+    </style>
+</head>
+<body>
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <h1>Snippet Not Found</h1>
+    <p>The snippet you're looking for doesn't exist or you don't have permission to view it.</p>
+    <a href="/app/tailwind-snippet">Browse Snippets</a>
+</body>
+</html>
+{% endif %}
