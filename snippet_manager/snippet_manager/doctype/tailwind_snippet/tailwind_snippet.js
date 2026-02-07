@@ -8,9 +8,9 @@ frappe.ui.form.on("Tailwind Snippet", {
 			viewport: "100%",
 			viewport_label: "Desktop",
 			background: "light",
-			zoom: 100,
+			zoom: 60,
 			height: 500,
-			custom_width: null,
+			custom_width: "1368",
 		};
 		frm.preview_debounce_timer = null;
 	},
@@ -199,6 +199,9 @@ frappe.ui.form.on("Tailwind Snippet", {
 					? "background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;"
 					: "background-color: #ffffff;";
 
+
+		const screenHeight = window.innerHeight || 800;
+
 		const preview_html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -210,16 +213,23 @@ frappe.ui.form.on("Tailwind Snippet", {
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            min-height: 100vh;
+            min-height: auto;
             ${bg_style}
         }
         ${custom_css}
+
+
     </style>
 </head>
 <body>
     ${html_code}
+    <style>
+        .min-h-screen { min-height: ${screenHeight}px !important; }
+        .h-screen { height: ${screenHeight}px !important; }
+        .max-h-screen { max-height: ${screenHeight}px !important; }
+    </style>
 </body>
 </html>`;
 		frm.preview_html_content = preview_html;
@@ -237,9 +247,11 @@ frappe.ui.form.on("Tailwind Snippet", {
 		iframe_doc.write(frm.preview_html_content);
 		iframe_doc.close();
 
-		// Auto-resize after content loads
+
 		iframe.onload = function () {
 			frm.trigger("auto_resize_iframe");
+			setTimeout(() => frm.trigger("auto_resize_iframe"), 500);
+			setTimeout(() => frm.trigger("auto_resize_iframe"), 1500);
 		};
 	},
 
@@ -325,7 +337,7 @@ frappe.ui.form.on("Tailwind Snippet", {
 				</div>
 
 				<!-- Resizable Preview Frame -->
-				<div class="preview-resizable-wrapper">
+				<div class="preview-resizable-wrapper" style="zoom: ${state.zoom}%;">
 					<div class="resize-handle resize-handle-left" data-side="left">
 						<div class="handle-bar"></div>
 					</div>

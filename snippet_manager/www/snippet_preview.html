@@ -313,6 +313,11 @@
         let currentWidth = null; // null means 100%
 
         // Generate iframe content
+        // Use the parent window's viewport height so vh units inside the
+        // iframe resolve to the actual screen height, not the iframe's own
+        // auto-expanding height.
+        const screenHeight = window.innerHeight || 800;
+
         function getPreviewHTML(bgType) {
             const bgStyles = {
                 light: 'background-color: #ffffff;',
@@ -331,9 +336,9 @@
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            min-height: 100vh;
+            min-height: auto;
             ${bgStyles[bgType] || bgStyles.light}
         }
         ${customCss}
@@ -341,6 +346,14 @@
 </head>
 <body>
     ${htmlCode}
+    <style>
+        /* Fix: Override viewport-height utilities to use the actual screen
+           height instead of the iframe's own height, preventing circular
+           expansion when the iframe is auto-sized to its content. */
+        .min-h-screen { min-height: ${screenHeight}px !important; }
+        .h-screen { height: ${screenHeight}px !important; }
+        .max-h-screen { max-height: ${screenHeight}px !important; }
+    </style>
 </body>
 </html>`;
         }
@@ -353,7 +366,7 @@
             doc.write(getPreviewHTML(currentBg));
             doc.close();
 
-            iframe.onload = function() {
+            function resizeIframe() {
                 try {
                     const body = doc.body;
                     const html = doc.documentElement;
@@ -363,6 +376,14 @@
                     );
                     iframe.style.minHeight = Math.max(height + 40, window.innerHeight - 110) + 'px';
                 } catch(e) {}
+            }
+
+            iframe.onload = function() {
+                // Resize immediately and again after delays to account
+                // for Tailwind CSS browser's async compilation
+                resizeIframe();
+                setTimeout(resizeIframe, 500);
+                setTimeout(resizeIframe, 1500);
             };
         }
 
