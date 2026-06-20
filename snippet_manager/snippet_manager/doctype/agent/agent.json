@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2026-06-20 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "status",
+  "column_break_1",
+  "derived_from_prompt",
+  "file_path",
+  "related_skills_section",
+  "related_skills",
+  "description_section",
+  "description",
+  "system_prompt_section",
+  "system_prompt"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Experimental\nActive\nArchived",
+   "default": "Experimental",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "derived_from_prompt",
+   "fieldtype": "Link",
+   "label": "Derived From Prompt",
+   "options": "Prompt",
+   "in_standard_filter": 1,
+   "description": "The prompt that manifested this agent."
+  },
+  {
+   "fieldname": "file_path",
+   "fieldtype": "Data",
+   "label": "File Path",
+   "description": "On-disk location of the agent (source of truth)."
+  },
+  {
+   "fieldname": "related_skills_section",
+   "fieldtype": "Section Break",
+   "label": "Related Skills"
+  },
+  {
+   "fieldname": "related_skills",
+   "fieldtype": "Table",
+   "label": "Related Skills",
+   "options": "Agent Skill"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "system_prompt_section",
+   "fieldtype": "Section Break",
+   "label": "System Prompt"
+  },
+  {
+   "fieldname": "system_prompt",
+   "fieldtype": "Markdown Editor",
+   "label": "System Prompt",
+   "ignore_xss_filter": 1,
+   "description": "The actual system prompt that drives this agent."
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-20 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Snippet Manager",
+ "name": "Agent",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
