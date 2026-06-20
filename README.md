@@ -1,6 +1,9 @@
 # Snippet Manager
 
-A powerful Frappe app for managing and previewing Tailwind CSS snippets. Store components, sections, pages, and layouts with live preview capabilities.
+A Frappe app with two domains:
+
+1. **Tailwind Snippets** — store and live-preview Tailwind CSS components, sections, pages, layouts.
+2. **Prompt Manager** — store, version, categorise, and track usage of LLM prompts. See [`docs/prompts.md`](./docs/prompts.md).
 
 ## Features
 
@@ -35,8 +38,10 @@ A powerful Frappe app for managing and previewing Tailwind CSS snippets. Store c
 See the [docs](./docs/) folder for detailed documentation:
 
 - [Getting Started](./docs/getting-started.md) - Installation and first steps
-- [Doctypes](./docs/doctypes.md) - Field reference
-- [Features](./docs/features.md) - Complete feature documentation
+- [Doctypes](./docs/doctypes.md) - Field reference for all doctypes
+- [Features](./docs/features.md) - Tailwind snippet feature documentation
+- [Prompt Manager](./docs/prompts.md) - Prompt management workflow (projects, versions, runs)
+- [Architecture](./docs/architecture.md) - Technical architecture
 
 ## Installation
 
@@ -65,10 +70,24 @@ bench restart
 
 ## Doctypes
 
+### Tailwind side
+
 | Doctype | Description |
 |---------|-------------|
 | **Tailwind Snippet** | Store and preview Tailwind code |
 | **Snippet Category** | Organize snippets by category |
+
+### Prompt side
+
+| Doctype | Description |
+|---------|-------------|
+| **Prompt** | A single LLM prompt. Auto-snapshots previous body on edit. |
+| **Prompt Category** | Cross-cutting tag for prompts (orthogonal to Project) |
+| **Project** | Groups prompts by piece of work (e.g. iVend, Navgold) |
+| **Prompt Version** | Snapshot of a previous `Prompt.prompt` value |
+| **Prompt Run** | A specific usage — implementation directive, bash script, or note |
+
+See [`docs/prompts.md`](./docs/prompts.md) for the workflow.
 
 ## Preview Modes
 

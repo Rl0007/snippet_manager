@@ -1,0 +1,133 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2026-02-08 08:35:35.161635",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "column_break_ywnj",
+  "project",
+  "category",
+  "section_break_umxz",
+  "prompt",
+  "runs_section",
+  "runs",
+  "version_history_section",
+  "version_history",
+  "legacy_section",
+  "prompt_2"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_ywnj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Prompt Category",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "section_break_umxz",
+   "fieldtype": "Section Break",
+   "label": "Current Prompt"
+  },
+  {
+   "fieldname": "prompt",
+   "fieldtype": "Markdown Editor",
+   "ignore_xss_filter": 1,
+   "label": "Prompt"
+  },
+  {
+   "fieldname": "runs_section",
+   "fieldtype": "Section Break",
+   "label": "Runs",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "runs",
+   "fieldtype": "HTML",
+   "label": "Runs"
+  },
+  {
+   "fieldname": "version_history_section",
+   "fieldtype": "Section Break",
+   "label": "Version History",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "version_history",
+   "fieldtype": "HTML",
+   "label": "Version History"
+  },
+  {
+   "fieldname": "legacy_section",
+   "fieldtype": "Section Break",
+   "label": "Legacy",
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!doc.prompt_2"
+  },
+  {
+   "fieldname": "prompt_2",
+   "fieldtype": "Long Text",
+   "label": "Prompt 2 (deprecated)",
+   "read_only": 1,
+   "description": "Legacy field kept for safety. New edits go to Prompt above; previous versions appear under Version History."
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "History",
+   "link_doctype": "Prompt Version",
+   "link_fieldname": "parent_prompt"
+  },
+  {
+   "group": "Usage",
+   "link_doctype": "Prompt Run",
+   "link_fieldname": "parent_prompt"
+  }
+ ],
+ "modified": "2026-04-29 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Snippet Manager",
+ "name": "Prompt",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
