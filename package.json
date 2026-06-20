@@ -1,0 +1,19 @@
+{
+	"name": "snippet_manager",
+	"version": "1.0.0",
+	"description": "Snippet & AI-asset manager",
+	"scripts": {
+		"postinstall": "yarn tailwind:build",
+		"build": "yarn tailwind:build",
+		"tailwind:watch": "npx @tailwindcss/cli -i ./snippet_manager/public/css/main.css -o ./snippet_manager/public/css/tailwind.css --watch",
+		"tailwind:build": "npx @tailwindcss/cli -i ./snippet_manager/public/css/main.css -o ./snippet_manager/public/css/tailwind.css"
+	},
+	"dependencies": {
+		"@tailwindcss/cli": "^4.0.14",
+		"tailwindcss": "^4.0.14"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@tailwindcss/typography": "^0.5.16"
+	}
+}

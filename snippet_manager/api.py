@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import md_to_html
 
 
 def node_id(kind, name):
@@ -115,6 +116,11 @@ def get_asset_detail(kind, name):
 
 	content_field, description_field = _DETAIL_FIELDS[kind]
 	doc = frappe.get_cached_doc(kind, name)
+	content = doc.get(content_field)
+
+	# Workflow content is code (shown verbatim in a <pre>); the rest is Markdown rendered
+	# server-side so the page needs no client markdown/sanitizer libs. md_to_html sanitizes.
+	content_html = None if kind == "Workflow" else md_to_html(content or "")
 
 	return {
 		"kind": kind,
@@ -123,6 +129,7 @@ def get_asset_detail(kind, name):
 		"status": doc.get("status"),
 		"file_path": doc.get("file_path"),
 		"description": doc.get(description_field),
-		"content": doc.get(content_field),
+		"content": content,
+		"content_html": content_html,
 		"derived_from_prompt": doc.get("derived_from_prompt"),
 	}

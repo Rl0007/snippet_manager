@@ -1,0 +1,140 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Tell Tailwind v4 where to scan for utility class usage */
+@source "../../templates/**/*.html";
+@source "../../www/**/*.html";
+@source "../../templates/**/*.py";
+
+/* Asset-kind colors as design tokens — markup uses bg-kind-* / text-kind-*, never hardcoded hex. */
+@theme {
+	--color-kind-prompt: #7c3aed;
+	--color-kind-skill: #0891b2;
+	--color-kind-agent: #ea580c;
+	--color-kind-workflow: #16a34a;
+	--color-line: #e2e8f0;
+}
+
+/*
+ * Drawflow canvas + node styling. Drawflow ships its own .drawflow-node rules (cyan fill, black
+ * border) at .drawflow .drawflow-node specificity and loads after this file, so every override
+ * here is scoped under .asset-canvas to win on specificity rather than load order.
+ */
+.asset-canvas {
+	background-color: #f8fafc;
+	background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+	background-size: 22px 22px;
+}
+
+.asset-canvas .drawflow .drawflow-node {
+	background: #ffffff;
+	border: 1px solid var(--color-line);
+	border-left-width: 4px;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+	padding: 0;
+	width: 208px;
+	min-height: 0;
+	color: #1e293b;
+	transition: box-shadow 0.15s, opacity 0.15s;
+}
+
+.asset-canvas .drawflow .drawflow-node:hover {
+	box-shadow: 0 4px 14px rgb(15 23 42 / 0.12);
+	cursor: pointer;
+}
+
+.asset-canvas .drawflow .drawflow-node.selected {
+	background: #ffffff;
+}
+
+.asset-canvas .drawflow .drawflow-node.kind-prompt {
+	border-left-color: var(--color-kind-prompt);
+}
+.asset-canvas .drawflow .drawflow-node.kind-skill {
+	border-left-color: var(--color-kind-skill);
+}
+.asset-canvas .drawflow .drawflow-node.kind-agent {
+	border-left-color: var(--color-kind-agent);
+}
+.asset-canvas .drawflow .drawflow-node.kind-workflow {
+	border-left-color: var(--color-kind-workflow);
+}
+
+/* Focus mode: selected node + neighbours stay solid, the rest fade so a chain is easy to follow. */
+.asset-canvas .drawflow.is-focusing .drawflow-node {
+	opacity: 0.22;
+}
+.asset-canvas .drawflow.is-focusing .drawflow-node.is-focused {
+	opacity: 1;
+	box-shadow: 0 0 0 2px #0f172a;
+}
+
+/* Connection lines: default is a heavy 5px steel-blue; soften to a thin slate. */
+.asset-canvas .drawflow .connection .main-path {
+	stroke: #cbd5e1;
+	stroke-width: 2px;
+}
+.asset-canvas .drawflow .connection .main-path:hover {
+	stroke: #94a3b8;
+}
+
+/* Read-only map: shrink the editor's port dots to subtle anchors (default is 20px yellow/white)
+ * and block pointer events so edit mode can't be used to draw new connections by dragging them. */
+.asset-canvas .drawflow .drawflow-node .input,
+.asset-canvas .drawflow .drawflow-node .output {
+	width: 8px;
+	height: 8px;
+	background: var(--color-line);
+	border: none;
+	cursor: default;
+	pointer-events: none;
+}
+.asset-canvas .drawflow .drawflow-node .input {
+	left: -13px;
+}
+.asset-canvas .drawflow .drawflow-node .output {
+	right: -5px;
+}
+
+.asset-node {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+}
+.asset-node .kind-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 9999px;
+	flex-shrink: 0;
+}
+.kind-prompt .kind-dot {
+	background: var(--color-kind-prompt);
+}
+.kind-skill .kind-dot {
+	background: var(--color-kind-skill);
+}
+.kind-agent .kind-dot {
+	background: var(--color-kind-agent);
+}
+.kind-workflow .kind-dot {
+	background: var(--color-kind-workflow);
+}
+.asset-node .node-meta {
+	min-width: 0;
+}
+.asset-node .node-kind {
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #94a3b8;
+}
+.asset-node .node-title {
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

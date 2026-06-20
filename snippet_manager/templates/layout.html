@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{% block title %}Snippet Manager{% endblock %}</title>
+	<link rel="stylesheet" href="/assets/snippet_manager/css/tailwind.css?v={{ asset_version or 0 }}">
+	{% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+	{% block content %}{% endblock %}
+
+	{% block script %}{% endblock %}
+
+	<!-- Alpine last and deferred so any x-data component defined by the page script registers first. -->
+	<script defer src="/assets/snippet_manager/js/vendor/alpine.min.js"></script>
+</body>
+</html>
