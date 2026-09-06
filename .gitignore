@@ -53,3 +53,9 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+# drawio skill scratch
+.drawio-tmp/
+
+# symlinked build deps (gitignore node_modules/ does not match beyond a symlink)
+snippet_manager/public/node_modules

@@ -1,0 +1,94 @@
+meta:
+  theme: tech-blue
+  layout: horizontal
+  canvas: auto
+  routing: orthogonal
+  title: "Context Flow — two axes, not one ladder"
+  description: "Knowledge capture (prompt->skill) and execution distribution (agent->workflow) are orthogonal, joined by a skill-invokes-agent bridge, with a memory feedback rail and a demotion path."
+
+modules:
+  - id: knowledge
+    label: "Axis A — Knowledge Capture (what to do)"
+    color: $primary
+  - id: execution
+    label: "Axis B — Execution Distribution (how to spread work / protect context)"
+    color: $secondary
+
+nodes:
+  - id: prompt
+    label: "Prompt\n(stateless instruction)"
+    type: process
+    module: knowledge
+    position: { x: 140, y: 170 }
+  - id: skill
+    label: "Skill\n(reusable knowledge pkg,\nloaded into YOUR context)"
+    type: process
+    module: knowledge
+    position: { x: 380, y: 170 }
+
+  - id: agent
+    label: "Agent\n(separate context window,\nreturns conclusion only)"
+    type: service
+    module: execution
+    position: { x: 700, y: 170 }
+  - id: workflow
+    label: "Workflow\n(many agents, deterministic\nfan-out + verification)"
+    type: service
+    module: execution
+    position: { x: 960, y: 170 }
+
+  - id: memory
+    label: "Memory\n(why it worked / what broke)"
+    type: database
+    position: { x: 550, y: 430 }
+
+edges:
+  # Axis A — promotion
+  - from: prompt
+    to: skill
+    type: primary
+    label: "reused 2-3x + needs bundled files"
+    labelOffset: { x: 0, y: -16 }
+
+  # Bridge — a skill INVOKES an agent (not a promotion)
+  - from: skill
+    to: agent
+    type: data
+    label: "skill invokes agent when work is\ncontext-heavy / parallelizable"
+    labelOffset: { x: 0, y: -20 }
+
+  # Axis B — promotion
+  - from: agent
+    to: workflow
+    type: primary
+    label: "need MANY agents coordinated + verify"
+    labelOffset: { x: 0, y: -16 }
+
+  # Demotion / return rail — prune the ladder, don't just climb
+  - from: workflow
+    to: agent
+    type: optional
+    label: "overkill? collapse back"
+    labelOffset: { x: 0, y: 22 }
+  - from: agent
+    to: skill
+    type: optional
+    label: "cheap? fold inline"
+    labelOffset: { x: 0, y: 22 }
+
+  # Feedback sink
+  - from: skill
+    to: memory
+    type: dependency
+    label: "learnings"
+    labelOffset: { x: -14, y: 0 }
+  - from: workflow
+    to: memory
+    type: dependency
+    label: "learnings"
+    labelOffset: { x: 14, y: 0 }
+  - from: memory
+    to: prompt
+    type: data
+    label: "next prompt starts smarter"
+    labelOffset: { x: -14, y: 0 }
