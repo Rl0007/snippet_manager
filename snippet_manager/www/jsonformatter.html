@@ -1,0 +1,271 @@
+{% extends "snippet_manager/templates/layout.html" %}
+
+{% block title %}{{ _("JSON Formatter") }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/assets/snippet_manager/js/vendor/vanilla-jsoneditor/jse-theme-dark.css">
+{% endblock %}
+
+{% macro header_button(label) %}
+<button
+	type="button"
+	class="inline-flex shrink-0 items-center justify-center rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark"
+	{{ caller() }}
+>{{ label }}</button>
+{% endmacro %}
+
+{% block content %}
+<div x-data="json_formatter" class="flex h-screen flex-col bg-surface-alt text-on-surface-strong dark:bg-surface-dark dark:text-on-surface-dark-strong">
+	<header class="flex shrink-0 flex-wrap items-center gap-2 border-b border-outline bg-surface px-4 py-2 dark:border-outline-dark dark:bg-surface-dark-alt">
+		<h1 class="mr-auto text-base font-semibold">{{ _("JSON formatter") }}</h1>
+		<span class="text-xs text-on-surface dark:text-on-surface-dark" x-text="status_text"></span>
+		{% call header_button(_("History")) %}@click="show_history = !show_history"{% endcall %}
+		{% call header_button(_("New")) %}@click="new_document()"{% endcall %}
+		<label class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark">
+			{{ _("Open file") }}
+			<input type="file" accept=".json,.log,.txt,application/json,text/plain" class="sr-only" @change="open_file($event)">
+		</label>
+		<button
+			type="button"
+			class="inline-flex w-20 shrink-0 items-center justify-center rounded-radius bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:opacity-90"
+			@click="copy_text()"
+			x-text="copied ? '{{ _('Copied') }}' : '{{ _('Copy') }}'"
+		>{{ _("Copy") }}</button>
+	</header>
+
+	<div class="flex min-h-0 flex-1">
+		<aside
+			x-show="show_history"
+			x-cloak
+			class="flex w-72 shrink-0 flex-col border-r border-outline bg-surface dark:border-outline-dark dark:bg-surface-dark-alt"
+		>
+			<p class="border-b border-outline px-4 py-2 text-xs font-semibold uppercase tracking-wide text-on-surface dark:border-outline-dark dark:text-on-surface-dark">
+				{{ _("History") }} <span x-text="`(${entries.length}/${max_entries})`"></span>
+			</p>
+			<div class="min-h-0 flex-1 overflow-y-auto">
+				<template x-for="entry in entries" :key="entry.id">
+					<div
+						class="group border-b border-outline px-4 py-2 dark:border-outline-dark"
+						:class="entry.id === current_id ? 'bg-surface-alt dark:bg-surface-dark' : ''"
+					>
+						<input
+							type="text"
+							class="w-full truncate rounded-radius border border-transparent bg-transparent px-1 py-0.5 text-sm font-medium text-on-surface-strong hover:border-outline focus:border-primary focus:outline-none dark:text-on-surface-dark-strong dark:hover:border-outline-dark"
+							x-model="entry.title"
+							@change="rename_entry(entry)"
+						>
+						<div class="mt-1 flex items-center gap-2 px-1 text-xs text-on-surface dark:text-on-surface-dark">
+							<button type="button" class="font-semibold text-on-surface-strong hover:underline dark:text-on-surface-dark-strong" @click="open_entry(entry)">{{ _("Open") }}</button>
+							<span x-text="format_size(entry.size)"></span>
+							<span class="truncate" x-text="format_time(entry.saved_at)"></span>
+							<button type="button" class="ml-auto hover:text-on-surface-strong dark:hover:text-on-surface-dark-strong" @click="delete_entry(entry)">{{ _("Delete") }}</button>
+						</div>
+					</div>
+				</template>
+				<p x-show="!entries.length" class="px-4 py-6 text-center text-sm text-on-surface dark:text-on-surface-dark">
+					{{ _("Nothing saved yet. Paste or open a JSON and it is kept here.") }}
+				</p>
+			</div>
+		</aside>
+
+		<main class="min-w-0 flex-1 p-3">
+			<div x-ref="editor_target" class="h-full"></div>
+		</main>
+	</div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+	import { createJSONEditor } from '/assets/snippet_manager/js/vendor/vanilla-jsoneditor/standalone.js';
+
+	const DATABASE_NAME = 'jsonformatter';
+	const MAX_ENTRIES = 20;
+	const AUTOSAVE_DELAY_MS = 1500;
+
+	// Kept outside Alpine: its reactive proxy breaks the editor instance.
+	let editor = null;
+	let autosave_timer = null;
+
+	// IndexedDB, not localStorage: big logs blow past localStorage's ~5 MB quota. Metadata and bodies
+	// live in separate stores so listing history never loads every saved document into memory.
+	function run_request(request) {
+		return new Promise((resolve, reject) => {
+			request.onsuccess = () => resolve(request.result);
+			request.onerror = () => reject(request.error);
+		});
+	}
+
+	async function open_database() {
+		const request = indexedDB.open(DATABASE_NAME, 1);
+		request.onupgradeneeded = () => {
+			request.result.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+			request.result.createObjectStore('bodies');
+		};
+		return run_request(request);
+	}
+
+	async function get_stores(mode) {
+		const database = await open_database();
+		const transaction = database.transaction(['entries', 'bodies'], mode);
+		return [transaction.objectStore('entries'), transaction.objectStore('bodies')];
+	}
+
+	async function list_entries() {
+		const [entries] = await get_stores('readonly');
+		const rows = await run_request(entries.getAll());
+		return rows.sort((first, second) => second.saved_at - first.saved_at);
+	}
+
+	async function save_entry(entry, text) {
+		const [entries, bodies] = await get_stores('readwrite');
+		const id = await run_request(entries.put(entry));
+		if (text !== undefined) {
+			await run_request(bodies.put(text, id));
+		}
+		return id;
+	}
+
+	async function remove_entry(id) {
+		const [entries, bodies] = await get_stores('readwrite');
+		await Promise.all([run_request(entries.delete(id)), run_request(bodies.delete(id))]);
+	}
+
+	function get_editor_text() {
+		const content = editor.get();
+		return content.text !== undefined ? content.text : JSON.stringify(content.json, null, 2);
+	}
+
+	function make_title(text) {
+		return text.slice(0, 200).replace(/\s+/g, ' ').trim().slice(0, 60) || 'Untitled';
+	}
+
+	document.addEventListener('alpine:init', () => {
+		Alpine.data('json_formatter', () => ({
+			entries: [],
+			current_id: null,
+			max_entries: MAX_ENTRIES,
+			show_history: window.matchMedia('(min-width: 768px)').matches,
+			status_text: '',
+			copied: false,
+
+			async init() {
+				editor = createJSONEditor({
+					target: this.$refs.editor_target,
+					props: {
+						content: { text: '' },
+						mode: 'text',
+						onChange: () => this.schedule_save(),
+					},
+				});
+				this.add_theme_listener();
+				await this.refresh_entries();
+			},
+
+			add_theme_listener() {
+				const dark_query = window.matchMedia('(prefers-color-scheme: dark)');
+				const apply_theme = () => this.$refs.editor_target.classList.toggle('jse-theme-dark', dark_query.matches);
+				apply_theme();
+				dark_query.addEventListener('change', apply_theme);
+			},
+
+			async refresh_entries() {
+				this.entries = await list_entries();
+			},
+
+			schedule_save() {
+				clearTimeout(autosave_timer);
+				autosave_timer = setTimeout(() => this.save_current(), AUTOSAVE_DELAY_MS);
+			},
+
+			async save_current() {
+				const text = get_editor_text();
+				if (!text.trim()) {
+					return;
+				}
+				const existing = this.entries.find((entry) => entry.id === this.current_id);
+				const entry = { title: existing ? existing.title : make_title(text), size: text.length, saved_at: Date.now() };
+				if (existing) {
+					entry.id = existing.id;
+				}
+				this.current_id = await save_entry(entry, text);
+				await this.prune_entries();
+				await this.refresh_entries();
+				this.status_text = `Saved ${new Date().toLocaleTimeString()}`;
+			},
+
+			async prune_entries() {
+				const rows = await list_entries();
+				await Promise.all(rows.slice(MAX_ENTRIES).map((row) => remove_entry(row.id)));
+			},
+
+			async open_entry(entry) {
+				const [, bodies] = await get_stores('readonly');
+				const text = await run_request(bodies.get(entry.id));
+				clearTimeout(autosave_timer);
+				this.current_id = entry.id;
+				editor.set({ text: text || '' });
+				this.status_text = '';
+			},
+
+			async rename_entry(entry) {
+				await save_entry({ id: entry.id, title: entry.title.trim() || 'Untitled', size: entry.size, saved_at: entry.saved_at });
+				await this.refresh_entries();
+			},
+
+			async delete_entry(entry) {
+				await remove_entry(entry.id);
+				if (entry.id === this.current_id) {
+					this.current_id = null;
+				}
+				await this.refresh_entries();
+			},
+
+			new_document() {
+				clearTimeout(autosave_timer);
+				this.current_id = null;
+				editor.set({ text: '' });
+				this.status_text = '';
+			},
+
+			async open_file(event) {
+				const file = event.target.files[0];
+				event.target.value = '';
+				if (!file) {
+					return;
+				}
+				this.current_id = null;
+				editor.set({ text: await file.text() });
+				await this.save_current();
+				const saved = this.entries.find((entry) => entry.id === this.current_id);
+				if (saved) {
+					saved.title = file.name;
+					await this.rename_entry(saved);
+				}
+			},
+
+			async copy_text() {
+				await navigator.clipboard.writeText(get_editor_text());
+				this.copied = true;
+				setTimeout(() => {
+					this.copied = false;
+				}, 1500);
+			},
+
+			format_size(size) {
+				if (size < 1024) {
+					return `${size} B`;
+				}
+				if (size < 1024 * 1024) {
+					return `${(size / 1024).toFixed(1)} KB`;
+				}
+				return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+			},
+
+			format_time(timestamp) {
+				return new Date(timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+			},
+		}));
+	});
+</script>
+{% endblock %}
