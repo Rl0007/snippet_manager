@@ -6,12 +6,27 @@
 <link rel="stylesheet" href="/assets/snippet_manager/js/vendor/vanilla-jsoneditor/jse-theme-dark.css">
 {% endblock %}
 
-{% macro header_button(label) %}
+{# Lucide icon paths, drawn with currentColor so they follow the text colour tokens. #}
+{%- macro icon(name, classes="size-4") -%}
+{%- set paths = {
+	"history": '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+	"file-plus": '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/>',
+	"upload": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+	"copy": '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+	"check": '<path d="M20 6 9 17l-5-5"/>',
+	"folder-open": '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+	"trash": '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>'
+} -%}
+<svg xmlns="http://www.w3.org/2000/svg" class="{{ classes }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ paths[name] | safe }}</svg>
+{%- endmacro -%}
+
+{% macro header_button(label, icon_name) %}
 <button
 	type="button"
-	class="inline-flex shrink-0 items-center justify-center rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark"
+	title="{{ label }}"
+	class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark"
 	{{ caller() }}
->{{ label }}</button>
+>{{ icon(icon_name) }}<span class="hidden sm:inline">{{ label }}</span></button>
 {% endmacro %}
 
 {% block content %}
@@ -19,18 +34,25 @@
 	<header class="flex shrink-0 flex-wrap items-center gap-2 border-b border-outline bg-surface px-4 py-2 dark:border-outline-dark dark:bg-surface-dark-alt">
 		<h1 class="mr-auto text-base font-semibold">{{ _("JSON formatter") }}</h1>
 		<span class="text-xs text-on-surface dark:text-on-surface-dark" x-text="status_text"></span>
-		{% call header_button(_("History")) %}@click="show_history = !show_history"{% endcall %}
-		{% call header_button(_("New")) %}@click="new_document()"{% endcall %}
-		<label class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark">
-			{{ _("Open file") }}
+		{% call header_button(_("History"), "history") %}@click="show_history = !show_history"{% endcall %}
+		{% call header_button(_("New"), "file-plus") %}@click="new_document()"{% endcall %}
+		<label
+			title="{{ _('Open file') }}"
+			class="inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-radius border border-outline px-3 py-1.5 text-sm font-semibold text-on-surface-strong transition hover:bg-surface-alt dark:border-outline-dark dark:text-on-surface-dark-strong dark:hover:bg-surface-dark"
+		>
+			{{ icon("upload") }}<span class="hidden sm:inline">{{ _("Open file") }}</span>
 			<input type="file" accept=".json,.log,.txt,application/json,text/plain" class="sr-only" @change="open_file($event)">
 		</label>
 		<button
 			type="button"
-			class="inline-flex w-20 shrink-0 items-center justify-center rounded-radius bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:opacity-90"
+			title="{{ _('Copy JSON') }}"
+			class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-radius bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:opacity-90"
 			@click="copy_text()"
-			x-text="copied ? '{{ _('Copied') }}' : '{{ _('Copy') }}'"
-		>{{ _("Copy") }}</button>
+		>
+			<span x-show="!copied">{{ icon("copy") }}</span>
+			<span x-show="copied" x-cloak>{{ icon("check") }}</span>
+			<span class="hidden sm:inline" x-text="copied ? '{{ _('Copied') }}' : '{{ _('Copy') }}'">{{ _("Copy") }}</span>
+		</button>
 	</header>
 
 	<div class="flex min-h-0 flex-1">
@@ -45,20 +67,32 @@
 			<div class="min-h-0 flex-1 overflow-y-auto">
 				<template x-for="entry in entries" :key="entry.id">
 					<div
-						class="group border-b border-outline px-4 py-2 dark:border-outline-dark"
+						class="border-b border-outline px-3 py-2 dark:border-outline-dark"
 						:class="entry.id === current_id ? 'bg-surface-alt dark:bg-surface-dark' : ''"
 					>
-						<input
-							type="text"
-							class="w-full truncate rounded-radius border border-transparent bg-transparent px-1 py-0.5 text-sm font-medium text-on-surface-strong hover:border-outline focus:border-primary focus:outline-none dark:text-on-surface-dark-strong dark:hover:border-outline-dark"
-							x-model="entry.title"
-							@change="rename_entry(entry)"
-						>
-						<div class="mt-1 flex items-center gap-2 px-1 text-xs text-on-surface dark:text-on-surface-dark">
-							<button type="button" class="font-semibold text-on-surface-strong hover:underline dark:text-on-surface-dark-strong" @click="open_entry(entry)">{{ _("Open") }}</button>
+						<div class="flex items-center gap-1">
+							<input
+								type="text"
+								class="min-w-0 flex-1 truncate rounded-radius border border-transparent bg-transparent px-1 py-0.5 text-sm font-medium text-on-surface-strong hover:border-outline focus:border-primary focus:outline-none dark:text-on-surface-dark-strong dark:hover:border-outline-dark"
+								x-model="entry.title"
+								@change="rename_entry(entry)"
+							>
+							<button
+								type="button"
+								title="{{ _('Open') }}"
+								class="inline-flex shrink-0 items-center justify-center rounded-radius p-1.5 text-on-surface transition hover:bg-surface-alt hover:text-on-surface-strong dark:text-on-surface-dark dark:hover:bg-surface-dark dark:hover:text-on-surface-dark-strong"
+								@click="open_entry(entry)"
+							>{{ icon("folder-open") }}<span class="sr-only">{{ _("Open") }}</span></button>
+							<button
+								type="button"
+								title="{{ _('Delete') }}"
+								class="inline-flex shrink-0 items-center justify-center rounded-radius p-1.5 text-on-surface transition hover:bg-surface-alt hover:text-on-surface-strong dark:text-on-surface-dark dark:hover:bg-surface-dark dark:hover:text-on-surface-dark-strong"
+								@click="delete_entry(entry)"
+							>{{ icon("trash") }}<span class="sr-only">{{ _("Delete") }}</span></button>
+						</div>
+						<div class="mt-0.5 flex items-center gap-2 px-1 text-xs text-on-surface dark:text-on-surface-dark">
 							<span x-text="format_size(entry.size)"></span>
 							<span class="truncate" x-text="format_time(entry.saved_at)"></span>
-							<button type="button" class="ml-auto hover:text-on-surface-strong dark:hover:text-on-surface-dark-strong" @click="delete_entry(entry)">{{ _("Delete") }}</button>
 						</div>
 					</div>
 				</template>
@@ -82,6 +116,9 @@
 	const DATABASE_NAME = 'jsonformatter';
 	const MAX_ENTRIES = 20;
 	const AUTOSAVE_DELAY_MS = 1500;
+	// The URL carries the history entry id, not the JSON: big logs exceed URL limits and would leak into
+	// browser history. Ids are per-browser, so a link only reopens in the browser that saved it.
+	const ENTRY_PARAM = 'entry';
 
 	// Kept outside Alpine: its reactive proxy breaks the editor instance.
 	let editor = null;
@@ -140,6 +177,24 @@
 		return text.slice(0, 200).replace(/\s+/g, ' ').trim().slice(0, 60) || 'Untitled';
 	}
 
+	function get_url_entry_id() {
+		const value = new URL(window.location.href).searchParams.get(ENTRY_PARAM);
+		return value ? Number(value) : null;
+	}
+
+	function set_url_entry_id(id, push) {
+		const url = new URL(window.location.href);
+		if (id) {
+			url.searchParams.set(ENTRY_PARAM, id);
+		} else {
+			url.searchParams.delete(ENTRY_PARAM);
+		}
+		if (url.href === window.location.href) {
+			return;
+		}
+		window.history[push ? 'pushState' : 'replaceState']({}, '', url);
+	}
+
 	document.addEventListener('alpine:init', () => {
 		Alpine.data('json_formatter', () => ({
 			entries: [],
@@ -160,6 +215,8 @@
 				});
 				this.add_theme_listener();
 				await this.refresh_entries();
+				await this.load_url_entry();
+				window.addEventListener('popstate', () => this.load_url_entry());
 			},
 
 			add_theme_listener() {
@@ -167,6 +224,15 @@
 				const apply_theme = () => this.$refs.editor_target.classList.toggle('jse-theme-dark', dark_query.matches);
 				apply_theme();
 				dark_query.addEventListener('change', apply_theme);
+			},
+
+			async load_url_entry() {
+				const entry = this.entries.find((row) => row.id === get_url_entry_id());
+				if (entry) {
+					await this.open_entry(entry, false);
+				} else {
+					this.new_document(false);
+				}
 			},
 
 			async refresh_entries() {
@@ -189,6 +255,7 @@
 					entry.id = existing.id;
 				}
 				this.current_id = await save_entry(entry, text);
+				set_url_entry_id(this.current_id, false);
 				await this.prune_entries();
 				await this.refresh_entries();
 				this.status_text = `Saved ${new Date().toLocaleTimeString()}`;
@@ -199,12 +266,13 @@
 				await Promise.all(rows.slice(MAX_ENTRIES).map((row) => remove_entry(row.id)));
 			},
 
-			async open_entry(entry) {
+			async open_entry(entry, push = true) {
 				const [, bodies] = await get_stores('readonly');
 				const text = await run_request(bodies.get(entry.id));
 				clearTimeout(autosave_timer);
 				this.current_id = entry.id;
 				editor.set({ text: text || '' });
+				set_url_entry_id(entry.id, push);
 				this.status_text = '';
 			},
 
@@ -216,15 +284,16 @@
 			async delete_entry(entry) {
 				await remove_entry(entry.id);
 				if (entry.id === this.current_id) {
-					this.current_id = null;
+					this.new_document(false);
 				}
 				await this.refresh_entries();
 			},
 
-			new_document() {
+			new_document(push = true) {
 				clearTimeout(autosave_timer);
 				this.current_id = null;
 				editor.set({ text: '' });
+				set_url_entry_id(null, push);
 				this.status_text = '';
 			},
 
@@ -234,7 +303,7 @@
 				if (!file) {
 					return;
 				}
-				this.current_id = null;
+				this.new_document();
 				editor.set({ text: await file.text() });
 				await this.save_current();
 				const saved = this.entries.find((entry) => entry.id === this.current_id);
