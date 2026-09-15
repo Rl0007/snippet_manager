@@ -13,7 +13,11 @@ frappe.listview_settings["Tailwind Snippet"] = {
 			Button: "red",
 			Other: "gray",
 		};
-		return [__(doc.snippet_type), type_colors[doc.snippet_type] || "gray", `snippet_type,=,${doc.snippet_type}`];
+		return [
+			__(doc.snippet_type),
+			type_colors[doc.snippet_type] || "gray",
+			`snippet_type,=,${doc.snippet_type}`,
+		];
 	},
 
 	formatters: {
@@ -56,7 +60,16 @@ frappe.listview_settings["Tailwind Snippet"] = {
 		);
 
 		// Add filter by type
-		const types = ["Component", "Section", "Page", "Layout", "Navigation", "Form", "Card", "Button"];
+		const types = [
+			"Component",
+			"Section",
+			"Page",
+			"Layout",
+			"Navigation",
+			"Form",
+			"Card",
+			"Button",
+		];
 		types.forEach((type) => {
 			listview.page.add_inner_button(
 				__(type),

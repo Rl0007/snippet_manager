@@ -196,9 +196,8 @@ frappe.ui.form.on("Tailwind Snippet", {
 			bg === "dark"
 				? "background-color: #1a1a2e; color: #eaeaea;"
 				: bg === "checkered"
-					? "background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;"
-					: "background-color: #ffffff;";
-
+				? "background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;"
+				: "background-color: #ffffff;";
 
 		const screenHeight = window.innerHeight || 800;
 
@@ -247,7 +246,6 @@ frappe.ui.form.on("Tailwind Snippet", {
 		iframe_doc.write(frm.preview_html_content);
 		iframe_doc.close();
 
-
 		iframe.onload = function () {
 			frm.trigger("auto_resize_iframe");
 			setTimeout(() => frm.trigger("auto_resize_iframe"), 500);
@@ -294,13 +292,19 @@ frappe.ui.form.on("Tailwind Snippet", {
 					<div class="toolbar-group">
 						<span class="toolbar-label">Viewport</span>
 						<div class="btn-group">
-							<button class="btn btn-xs btn-default viewport-btn ${state.viewport === "100%" && !state.custom_width ? "active" : ""}" data-width="100%" data-label="Desktop" title="Desktop (100%)">
+							<button class="btn btn-xs btn-default viewport-btn ${
+								state.viewport === "100%" && !state.custom_width ? "active" : ""
+							}" data-width="100%" data-label="Desktop" title="Desktop (100%)">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
 							</button>
-							<button class="btn btn-xs btn-default viewport-btn ${state.viewport === "768px" ? "active" : ""}" data-width="768px" data-label="Tablet" title="Tablet (768px)">
+							<button class="btn btn-xs btn-default viewport-btn ${
+								state.viewport === "768px" ? "active" : ""
+							}" data-width="768px" data-label="Tablet" title="Tablet (768px)">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
 							</button>
-							<button class="btn btn-xs btn-default viewport-btn ${state.viewport === "375px" ? "active" : ""}" data-width="375px" data-label="Mobile" title="Mobile (375px)">
+							<button class="btn btn-xs btn-default viewport-btn ${
+								state.viewport === "375px" ? "active" : ""
+							}" data-width="375px" data-label="Mobile" title="Mobile (375px)">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
 							</button>
 						</div>
@@ -310,13 +314,19 @@ frappe.ui.form.on("Tailwind Snippet", {
 					<div class="toolbar-group">
 						<span class="toolbar-label">Background</span>
 						<div class="btn-group">
-							<button class="btn btn-xs btn-default bg-btn ${state.background === "light" ? "active" : ""}" data-bg="light" title="Light Background">
+							<button class="btn btn-xs btn-default bg-btn ${
+								state.background === "light" ? "active" : ""
+							}" data-bg="light" title="Light Background">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
 							</button>
-							<button class="btn btn-xs btn-default bg-btn ${state.background === "dark" ? "active" : ""}" data-bg="dark" title="Dark Background">
+							<button class="btn btn-xs btn-default bg-btn ${
+								state.background === "dark" ? "active" : ""
+							}" data-bg="dark" title="Dark Background">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 							</button>
-							<button class="btn btn-xs btn-default bg-btn ${state.background === "checkered" ? "active" : ""}" data-bg="checkered" title="Checkered Background">
+							<button class="btn btn-xs btn-default bg-btn ${
+								state.background === "checkered" ? "active" : ""
+							}" data-bg="checkered" title="Checkered Background">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
 							</button>
 						</div>
@@ -331,7 +341,13 @@ frappe.ui.form.on("Tailwind Snippet", {
 
 					<!-- Viewport Info -->
 					<div class="viewport-info">
-						<span class="viewport-size">${state.custom_width ? state.custom_width + "px" : state.viewport === "100%" ? "Full Width" : state.viewport}</span>
+						<span class="viewport-size">${
+							state.custom_width
+								? state.custom_width + "px"
+								: state.viewport === "100%"
+								? "Full Width"
+								: state.viewport
+						}</span>
 						<span class="drag-hint">Drag edges to resize</span>
 					</div>
 				</div>
@@ -341,7 +357,9 @@ frappe.ui.form.on("Tailwind Snippet", {
 					<div class="resize-handle resize-handle-left" data-side="left">
 						<div class="handle-bar"></div>
 					</div>
-					<div class="preview-frame-wrapper" style="width: ${state.custom_width ? state.custom_width + "px" : state.viewport};">
+					<div class="preview-frame-wrapper" style="width: ${
+						state.custom_width ? state.custom_width + "px" : state.viewport
+					};">
 						<div class="preview-frame-container" data-bg="${state.background}">
 							<iframe class="preview-iframe" style="
 								width: 100%;
