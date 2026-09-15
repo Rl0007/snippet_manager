@@ -250,3 +250,5 @@ app_include_js = "/assets/snippet_manager/js/snippet_manager.js"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+
+page_renderer = ["snippet_manager.skill_registry.SkillRegistryPage"]

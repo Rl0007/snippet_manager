@@ -13,6 +13,21 @@
 	--color-kind-agent: #ea580c;
 	--color-kind-workflow: #16a34a;
 	--color-line: #e2e8f0;
+
+	/* Surface tokens ported from misc_helper's clipboard design system (tailwind/clipboard.css). */
+	--color-surface: #ffffff;
+	--color-surface-alt: #f7f7f8;
+	--color-on-surface: #4b5563;
+	--color-on-surface-strong: #0b0b0d;
+	--color-surface-dark: #0f1012;
+	--color-surface-dark-alt: #17181c;
+	--color-on-surface-dark: #a1a1aa;
+	--color-on-surface-dark-strong: #fafafa;
+	--color-primary: #475569;
+	--color-on-primary: #ffffff;
+	--color-outline: #e4e4e7;
+	--color-outline-dark: #2a2b31;
+	--radius-radius: 0.5rem;
 }
 
 /*
