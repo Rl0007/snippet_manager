@@ -25,5 +25,9 @@ def get_context(context):
 def get_asset_version():
 	public = frappe.get_app_path("snippet_manager", "public")
 	assets = [("css", "tailwind.css"), ("js", "asset_graph.js")]
-	mtimes = [os.path.getmtime(os.path.join(public, *parts)) for parts in assets if os.path.exists(os.path.join(public, *parts))]
+	mtimes = [
+		os.path.getmtime(os.path.join(public, *parts))
+		for parts in assets
+		if os.path.exists(os.path.join(public, *parts))
+	]
 	return int(max(mtimes)) if mtimes else 0

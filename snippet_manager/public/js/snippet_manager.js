@@ -26,7 +26,8 @@ snippet_manager.generate_preview_html = function (html_code, custom_css, options
 	const bg_styles = {
 		light: "background-color: #ffffff;",
 		dark: "background-color: #1a1a2e; color: #eaeaea;",
-		checkered: "background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;",
+		checkered:
+			"background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;",
 	};
 
 	return `<!DOCTYPE html>
@@ -137,22 +138,8 @@ snippet_manager.search = function (query, callback) {
 		method: "frappe.client.get_list",
 		args: {
 			doctype: "Tailwind Snippet",
-			filters: [
-				[
-					"Tailwind Snippet",
-					"title",
-					"like",
-					`%${query}%`,
-				],
-			],
-			or_filters: [
-				[
-					"Tailwind Snippet",
-					"tags",
-					"like",
-					`%${query}%`,
-				],
-			],
+			filters: [["Tailwind Snippet", "title", "like", `%${query}%`]],
+			or_filters: [["Tailwind Snippet", "tags", "like", `%${query}%`]],
 			fields: ["name", "title", "category", "snippet_type", "is_favorite"],
 			limit_page_length: 20,
 		},
@@ -170,7 +157,17 @@ snippet_manager.export_all = async function () {
 		method: "frappe.client.get_list",
 		args: {
 			doctype: "Tailwind Snippet",
-			fields: ["name", "title", "category", "snippet_type", "tags", "description", "html_code", "custom_css", "is_favorite"],
+			fields: [
+				"name",
+				"title",
+				"category",
+				"snippet_type",
+				"tags",
+				"description",
+				"html_code",
+				"custom_css",
+				"is_favorite",
+			],
 			limit_page_length: 0,
 		},
 		callback: function (r) {
@@ -211,7 +208,10 @@ snippet_manager.import_snippets = function () {
 				}
 
 				frappe.confirm(
-					__("Import {0} snippets? This will create new snippets, not update existing ones.", [snippets.length]),
+					__(
+						"Import {0} snippets? This will create new snippets, not update existing ones.",
+						[snippets.length]
+					),
 					function () {
 						let imported = 0;
 						snippets.forEach((snippet) => {
@@ -260,10 +260,7 @@ snippet_manager.import_snippets = function () {
 $(document).on("keydown", function (e) {
 	// Ctrl/Cmd + Shift + N: Quick create snippet (when on snippet pages)
 	if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "N") {
-		if (
-			frappe.get_route()[0] === "List" &&
-			frappe.get_route()[1] === "Tailwind Snippet"
-		) {
+		if (frappe.get_route()[0] === "List" && frappe.get_route()[1] === "Tailwind Snippet") {
 			e.preventDefault();
 			snippet_manager.quick_create();
 		}
@@ -282,8 +279,16 @@ $(document).ready(function () {
 			) {
 				// Remove existing buttons first to avoid duplicates
 				if (!cur_list._snippet_manager_buttons_added) {
-					cur_list.page.add_inner_button(__("Export All"), snippet_manager.export_all, __("Data"));
-					cur_list.page.add_inner_button(__("Import"), snippet_manager.import_snippets, __("Data"));
+					cur_list.page.add_inner_button(
+						__("Export All"),
+						snippet_manager.export_all,
+						__("Data")
+					);
+					cur_list.page.add_inner_button(
+						__("Import"),
+						snippet_manager.import_snippets,
+						__("Data")
+					);
 					cur_list._snippet_manager_buttons_added = true;
 				}
 			}

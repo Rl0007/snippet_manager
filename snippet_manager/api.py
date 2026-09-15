@@ -24,14 +24,26 @@ def get_asset_graph():
 
 	nodes = []
 	for prompt in prompts:
-		nodes.append({"id": node_id("Prompt", prompt.name), "kind": "Prompt", "label": prompt.name, "status": None})
+		nodes.append(
+			{"id": node_id("Prompt", prompt.name), "kind": "Prompt", "label": prompt.name, "status": None}
+		)
 	for skill in skills:
 		nodes.append(
-			{"id": node_id("Skill", skill.name), "kind": "Skill", "label": skill.title, "status": skill.status}
+			{
+				"id": node_id("Skill", skill.name),
+				"kind": "Skill",
+				"label": skill.title,
+				"status": skill.status,
+			}
 		)
 	for agent in agents:
 		nodes.append(
-			{"id": node_id("Agent", agent.name), "kind": "Agent", "label": agent.title, "status": agent.status}
+			{
+				"id": node_id("Agent", agent.name),
+				"kind": "Agent",
+				"label": agent.title,
+				"status": agent.status,
+			}
 		)
 	for workflow in workflows:
 		nodes.append(

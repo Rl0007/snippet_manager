@@ -10,10 +10,10 @@ const ROW_GAP = 104;
 async function fetch_method(method, args) {
 	// www pages load no Frappe JS, so there's no frappe.call here — plain fetch + CSRF token.
 	const response = await fetch(`/api/method/${method}`, {
-		method: 'POST',
+		method: "POST",
 		headers: {
-			'Content-Type': 'application/json',
-			'X-Frappe-CSRF-Token': window.csrf_token || '',
+			"Content-Type": "application/json",
+			"X-Frappe-CSRF-Token": window.csrf_token || "",
 		},
 		body: JSON.stringify(args || {}),
 	});
@@ -24,8 +24,8 @@ async function fetch_method(method, args) {
 }
 
 function escape_html(text) {
-	const div = document.createElement('div');
-	div.textContent = text || '';
+	const div = document.createElement("div");
+	div.textContent = text || "";
 	return div.innerHTML;
 }
 
@@ -51,9 +51,7 @@ function asset_graph() {
 		asset_by_df: {},
 
 		async init() {
-			const data = (await fetch_method(
-				'snippet_manager.api.get_asset_graph',
-			)) || {
+			const data = (await fetch_method("snippet_manager.api.get_asset_graph")) || {
 				nodes: [],
 				edges: [],
 			};
@@ -73,7 +71,7 @@ function asset_graph() {
 			// Default 'edit' mode is the only one that fires nodeSelected on click; 'fixed'/'view'
 			// swallow node clicks. Connection-drawing is blocked via pointer-events on the ports (CSS).
 			this.editor = editor;
-			this.df_el = container.querySelector('.drawflow');
+			this.df_el = container.querySelector(".drawflow");
 
 			const df_by_asset = {};
 			const row_count = {};
@@ -90,7 +88,7 @@ function asset_graph() {
 					`kind-${node.kind.toLowerCase()}`,
 					{},
 					node_html(node.kind, node.label),
-					false,
+					false
 				);
 				df_by_asset[node.id] = df_id;
 				this.asset_by_df[df_id] = node.id;
@@ -100,11 +98,11 @@ function asset_graph() {
 				const from = df_by_asset[edge.from];
 				const to = df_by_asset[edge.to];
 				if (from != null && to != null) {
-					editor.addConnection(from, to, 'output_1', 'input_1');
+					editor.addConnection(from, to, "output_1", "input_1");
 				}
 			}
 
-			editor.on('nodeSelected', (df_id) => this.open_detail(df_id));
+			editor.on("nodeSelected", (df_id) => this.open_detail(df_id));
 		},
 
 		async open_detail(df_id) {
@@ -112,8 +110,8 @@ function asset_graph() {
 			if (!asset_id) {
 				return;
 			}
-			const [kind, name] = asset_id.split('::');
-			this.detail = await fetch_method('snippet_manager.api.get_asset_detail', {
+			const [kind, name] = asset_id.split("::");
+			this.detail = await fetch_method("snippet_manager.api.get_asset_detail", {
 				kind,
 				name,
 			});
@@ -134,10 +132,10 @@ function asset_graph() {
 					neighbours.add(String(connection.node));
 				}
 			}
-			this.df_el.classList.add('is-focusing');
-			for (const element of this.df_el.querySelectorAll('.drawflow-node')) {
-				const id = element.id.replace('node-', '');
-				element.classList.toggle('is-focused', neighbours.has(id));
+			this.df_el.classList.add("is-focusing");
+			for (const element of this.df_el.querySelectorAll(".drawflow-node")) {
+				const id = element.id.replace("node-", "");
+				element.classList.toggle("is-focused", neighbours.has(id));
 			}
 			this.focusing = true;
 		},
@@ -146,9 +144,9 @@ function asset_graph() {
 			if (!this.df_el) {
 				return;
 			}
-			this.df_el.classList.remove('is-focusing');
-			for (const element of this.df_el.querySelectorAll('.is-focused')) {
-				element.classList.remove('is-focused');
+			this.df_el.classList.remove("is-focusing");
+			for (const element of this.df_el.querySelectorAll(".is-focused")) {
+				element.classList.remove("is-focused");
 			}
 			this.focusing = false;
 		},

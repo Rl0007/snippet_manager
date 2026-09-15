@@ -42,7 +42,8 @@ repos:
                 .*node_modules.*|
                 .*boilerplate.*|
                 snippet_manager/templates/includes/.*|
-                snippet_manager/public/js/lib/.*
+                snippet_manager/public/js/lib/.*|
+                snippet_manager/public/js/vendor/.*
             )$
 
 
@@ -60,7 +61,8 @@ repos:
                 .*node_modules.*|
                 .*boilerplate.*|
                 snippet_manager/templates/includes/.*|
-                snippet_manager/public/js/lib/.*
+                snippet_manager/public/js/lib/.*|
+                snippet_manager/public/js/vendor/.*
             )$
 
 ci:

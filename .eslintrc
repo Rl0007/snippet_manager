@@ -26,6 +26,8 @@
 	"root": true,
 	"globals": {
 		"frappe": true,
+		"snippet_manager": true,
+		"Drawflow": true,
 		"Vue": true,
 		"SetVueGlobals": true,
 		"__": true,

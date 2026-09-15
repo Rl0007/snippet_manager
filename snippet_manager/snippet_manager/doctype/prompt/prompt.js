@@ -169,7 +169,9 @@ function build_run_card(frm, run) {
 				<div style="min-width:0; flex:1;">
 					<div class="d-flex align-items-center" style="gap:8px; flex-wrap:wrap;">
 						<strong class="text-truncate">${frappe.utils.escape_html(title)}</strong>
-						<span class="indicator-pill ${outcome_color}">${frappe.utils.escape_html(run.outcome || "Pending")}</span>
+						<span class="indicator-pill ${outcome_color}">${frappe.utils.escape_html(
+		run.outcome || "Pending"
+	)}</span>
 						<span class="badge badge-secondary">${frappe.utils.escape_html(run.kind || "")}</span>
 					</div>
 					<div class="text-muted small mt-1">${when}</div>
@@ -184,7 +186,13 @@ function build_run_card(frm, run) {
 			<div class="prompt-run-body" style="display:none; max-height:400px; overflow:auto;
 				border-top:1px solid var(--border-color); padding-top:8px; font-size:13px;">
 				${html_body}
-				${run.notes ? `<div class="mt-2 text-muted small"><strong>${__("Notes:")}</strong> ${frappe.utils.escape_html(run.notes)}</div>` : ""}
+				${
+					run.notes
+						? `<div class="mt-2 text-muted small"><strong>${__(
+								"Notes:"
+						  )}</strong> ${frappe.utils.escape_html(run.notes)}</div>`
+						: ""
+				}
 			</div>
 		</div>
 	`);

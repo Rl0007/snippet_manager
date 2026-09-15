@@ -34,9 +34,5 @@ class IntegrationTestAgent(IntegrationTestCase):
 
 		graph = get_asset_graph()
 		edges = {(edge["from"], edge["to"], edge["type"]) for edge in graph["edges"]}
-		self.assertIn(
-			(node_id("Agent", agent.name), node_id("Skill", skill.name), "uses_skill"), edges
-		)
-		self.assertIn(
-			(node_id("Agent", agent.name), node_id("Prompt", prompt.name), "derived_from"), edges
-		)
+		self.assertIn((node_id("Agent", agent.name), node_id("Skill", skill.name), "uses_skill"), edges)
+		self.assertIn((node_id("Agent", agent.name), node_id("Prompt", prompt.name), "derived_from"), edges)
